@@ -114,7 +114,8 @@ private
       url_split = URI.split(url[0])
       # check to see if the URL is YouTube
       if url_split[2].downcase == "www.youtube.com"
-        # run YouTube logic here
+        # Add video to Database
+        # Send message explaining everything
       end
     end
     send_message(id, "Sent!")
