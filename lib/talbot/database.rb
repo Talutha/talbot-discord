@@ -10,6 +10,11 @@ class DatabaseCalls
     grab_tables
   end
 
+  def insert_new_video(username, userid, url)
+    @video_share.insert(:username => username, :userid => userid, :url => url,
+                        :upvotes => 0, :downvotes => 0, :timestamp => Time.now)
+  end
+
 private
 
   def connect_to_database
