@@ -1,0 +1,17 @@
+# The email address for your bot
+email:
+# Password for your bot
+password:
+# Hostname/IP for PostgreSQL
+host:
+# Database name
+dbname:
+# Database username
+dbuser:
+# Database password
+dbpassword:
+# Channel ID of where you would like stream announcements to go
+stream_announce:
+
+
+# DO NOT FORGET TO REMOVE .example FROM THE FILE NAME!
