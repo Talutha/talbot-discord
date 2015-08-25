@@ -14,15 +14,17 @@ require_relative './talbot/database'
 end
 
 @bot.message(in: "#video-share", from: not!("TalBotExtreme")) do |event|
-  puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
-  author = "#{event.author.username}"
-  userid = event.author.id
-  message = "#{event.content}"
-  timestamp = Time.now
-  channel_id = event.channel.id
-  share_video = VideoShare.new(author, message, timestamp, channel_id, userid)
-  if share_video.require_response
-    event.respond "#{share_video.response_message}"
+  Thread.new do
+    puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
+    author = "#{event.author.username}"
+    userid = event.author.id
+    message = "#{event.content}"
+    timestamp = Time.now
+    channel_id = event.channel.id
+    share_video = VideoShare.new(author, message, timestamp, channel_id, userid)
+    if share_video.require_response
+      event.respond "#{share_video.response_message}"
+    end
   end
 end
 
@@ -132,7 +134,7 @@ private
   def process_vote(message, userid, channelid)
     split = message.split
     videoid = split[1].to_i
-    if !user_has_voted(userid, videoid)
+    if !user_has_voted(userid, videoid, channelid)
       if split[0] == "!upvote" && videoid > 0
         @DB.register_vote(userid, videoid, "upvote")
         send_message(channelid, "<@#{userid}>: I have added your upvote to ##{videoid}.")
@@ -147,12 +149,16 @@ private
     end
   end
 
-  def user_has_voted(userid, videoid)
-    list = @DB.voted_list(videoid)
-    if list.include?(userid)
-      return true
+  def user_has_voted(userid, videoid, channelid)
+    if videoid <= 0
+      send_message(channelid, "<@#{userid}>: Please specify a correct video ID to vote on.")
     else
-      return false
+      list = @DB.voted_list(videoid)
+      if list.include?(userid)
+        return true
+      else
+        return false
+      end
     end
   end
 
