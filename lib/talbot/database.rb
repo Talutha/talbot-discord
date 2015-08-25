@@ -26,7 +26,7 @@ class DatabaseCalls
     latest_video_id
   end
 
-  def voted_list(userid, videoid)
+  def voted_list(videoid)
     @video_share.where[:id => videoid][:voted]
   end
 

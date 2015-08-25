@@ -132,14 +132,27 @@ private
   def process_vote(message, userid, channelid)
     split = message.split
     videoid = split[1].to_i
-    if split[0] == "!upvote" && videoid > 0
-      @DB.register_vote(userid, videoid, "upvote")
-      send_message(channelid, "<@#{userid}>: I have added your upvote to ##{videoid}.")
-    elsif split[0] == "!downvote" && videoid > 0
-      @DB.register_vote(userid, videoid, "downvote")
-      send_message(channelid, "<@#{userid}>: I have added your downvote to ##{videoid}.")
+    if !user_has_voted(userid, videoid)
+      if split[0] == "!upvote" && videoid > 0
+        @DB.register_vote(userid, videoid, "upvote")
+        send_message(channelid, "<@#{userid}>: I have added your upvote to ##{videoid}.")
+      elsif split[0] == "!downvote" && videoid > 0
+        @DB.register_vote(userid, videoid, "downvote")
+        send_message(channelid, "<@#{userid}>: I have added your downvote to ##{videoid}.")
+      else
+        send_message(channelid, "<@#{userid}>: Please specify a correct video ID to vote on.")
+      end
     else
-      send_message(channelid, "<@#{userid}>: Please specify a correct video ID to vote on.")
+      send_message(channelid, "<@#{userid}>: My apologies, but you have already voted on video ##{videoid}.")
+    end
+  end
+
+  def user_has_voted(userid, videoid)
+    list = @DB.voted_list(videoid)
+    if list.include?(userid)
+      return true
+    else
+      return false
     end
   end
 
