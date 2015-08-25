@@ -34,7 +34,7 @@ private
   def connect_to_database
     user = @config.dbuser
     pass = @config.dbpassword
-    host = @config.dbhost
+    host = @config.host
     dbname = @config.dbname
     @DB = Sequel.connect("postgres://#{user}:#{pass}@#{host}/#{dbname}")
   end
@@ -42,13 +42,13 @@ private
   # Check the database and make sure the tables required exists
   def create_tables
     @DB.run(" CREATE TABLE IF NOT EXISTS discord_video_share(
-                            id int PRIMARY KEY UNIQUE NOT NULL,
+                            id serial PRIMARY KEY NOT NULL,
                             url text NOT NULL,
                             username text NOT NULL,
-                            userid int NOT NULL,
+                            userid bigint NOT NULL,
                             upvotes int NOT NULL,
                             downvotes int NOT NULL,
-                            voted integer[],
+                            voted bigint[],
                             timestamp timestamp NOT NULL ); ")
   end
 

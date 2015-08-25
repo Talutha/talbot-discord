@@ -3,6 +3,7 @@ require 'json'
 require 'open-uri'
 require 'yaml'
 require_relative './talbot/config'
+require_relative './talbot/database'
 
 @config = BotConfig.new
 @bot = Discordrb::Bot.new @config.email, @config.password
@@ -15,10 +16,11 @@ end
 @bot.message(in: "#video-share", from: not!("TalBotExtreme")) do |event|
   puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
   author = "#{event.author.username}"
+  userid = event.author.id
   message = "#{event.content}"
   timestamp = Time.now
   channel_id = event.channel.id
-  share_video = VideoShare.new(author, message, timestamp, channel_id)
+  share_video = VideoShare.new(author, message, timestamp, channel_id, userid)
   if share_video.require_response
     event.respond "#{share_video.response_message}"
   end
@@ -94,9 +96,10 @@ class VideoShare
 
   attr_reader :require_response, :response_id, :response_message
 
-  def initialize(author, message, timestamp, id)
+  def initialize(author, message, timestamp, channelid, userid)
+    @DB = DatabaseCalls.new
     @require_response = false
-    parse_message(author, message, timestamp, id)
+    parse_message(author, message, timestamp, channelid, userid)
   end
 
   def send_message(id, message)
@@ -107,7 +110,7 @@ class VideoShare
 
 private
 
-  def parse_message(author, message, timestamp, id)
+  def parse_message(author, message, timestamp, channelid, userid)
     if (message =~ URI::regexp) != nil
       # message contains a URL
       url = URI.extract(message)
@@ -115,10 +118,11 @@ private
       # check to see if the URL is YouTube
       if url_split[2].downcase == "www.youtube.com"
         # Add video to Database
+        @DB.insert_new_video(author, userid, url[0])
         # Send message explaining everything
+        send_message(channelid, "I have added #{url} to the database!")
       end
     end
-    send_message(id, "Sent!")
   end
 
 end
