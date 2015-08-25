@@ -23,6 +23,7 @@ class DatabaseCalls
       downvote(userid, videoid)
     end
     add_to_voted(userid, videoid)
+    latest_video_id
   end
 
   def voted_list(userid, videoid)
@@ -72,6 +73,12 @@ private
     voted_list = @video_share.where[:id => videoid][:voted]
     voted_list << userid
     @video_share.where(:id => videoid).update(:voted => Sequel.pg_array(voted_list))
+  end
+
+  def latest_video_id
+    get_id = @DB[:video_share].reverse_order(:id).limit(1)
+    id = get_id.first[:id]
+    return id
   end
 
 end
