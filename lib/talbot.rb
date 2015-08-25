@@ -15,7 +15,7 @@ end
 
 @bot.message(in: "#video-share", from: not!("TalBotExtreme")) do |event|
   #Thread.new do
-    puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
+  # puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
     author = "#{event.author.username}"
     userid = event.author.id
     message = "#{event.content}"
@@ -24,7 +24,6 @@ end
     share_video = VideoShare.new(author, message, timestamp, channel_id, userid)
     if share_video.require_response
       event.respond "#{share_video.response_message}"
-      puts "-----[Share Video Response] Response sent: #{share_video.response_message}"
     end
   #end
 end
@@ -123,12 +122,14 @@ private
         # Add video to Database
         latest_id = @DB.insert_new_video(author, userid, url[0])
         # Send message explaining everything
-        send_message(channelid, "I have added <@#{userid}>'s video to the database under the ID ##{latest_id}")
+        send_message(channelid, "I have added <@#{userid}>'s video to the database under the ID ##{latest_id}! \n \n Vote on this video with **!upvote #{latest_id}** or **!downvote #{latest_id}**!")
       end
     # If user is attempting to vote, eg: !voteup 43, or !votedown 99
     elsif message.include?("!upvote") || message.include?("!downvote")
       # Go through vote processing
       process_vote(message, userid, channelid)
+    elsif message == "!random"
+      get_random_video(channelid)
     end
   end
 
@@ -177,6 +178,15 @@ private
     upvotes, downvotes, total = @DB.get_scores(videoid)
     score_string = "**#{total}**(*#{upvotes}:#{downvotes}*)"
     return score_string
+  end
+
+  def get_random_video(channelid)
+    latest_id = @DB.last_video_id
+    video_selected = rand(1..latest_id)
+    selected_url, selected_userid, selected_timestamp = @DB.get_video(video_selected)
+    upvotes, downvotes, total = @DB.get_scores(video_selected)
+    format_timestamp = selected_timestamp.strftime("%m/%d/%Y")
+    send_message(channelid, "<@#{selected_userid}> posted this video on #{format_timestamp}: #{selected_url} \n \n This video is currently rated **#{total}**(*#{upvotes}:#{downvotes}*). \n Vote on this video by typing **!upvote #{video_selected}** or **!downvote #{video_selected}**! \n \n ---------- ")
   end
 
 end

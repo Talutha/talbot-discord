@@ -45,6 +45,13 @@ class DatabaseCalls
     return upvotes, downvotes, total
   end
 
+  def get_video(videoid)
+    url = @video_share.where[:id => videoid][:url]
+    userid = @video_share.where[:id => videoid][:userid]
+    timestamp = @video_share.where[:id => videoid][:timestamp]
+    return url, userid, timestamp
+  end
+
 private
 
   def connect_to_database
