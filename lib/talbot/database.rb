@@ -27,7 +27,14 @@ class DatabaseCalls
   end
 
   def voted_list(videoid)
-    @video_share.where[:id => videoid][:voted]
+    list = @video_share.where[:id => videoid][:voted]
+    list = [] unless list != nil
+    return list
+  end
+
+  def last_video_id
+    id = latest_video_id
+    return id
   end
 
 private

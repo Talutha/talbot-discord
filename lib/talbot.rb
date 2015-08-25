@@ -14,7 +14,7 @@ require_relative './talbot/database'
 end
 
 @bot.message(in: "#video-share", from: not!("TalBotExtreme")) do |event|
-  Thread.new do
+  #Thread.new do
     puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
     author = "#{event.author.username}"
     userid = event.author.id
@@ -24,8 +24,9 @@ end
     share_video = VideoShare.new(author, message, timestamp, channel_id, userid)
     if share_video.require_response
       event.respond "#{share_video.response_message}"
+      puts "-----[Share Video Response] Response sent: #{share_video.response_message}"
     end
-  end
+  #end
 end
 
 @bot.ready do |event|
@@ -134,31 +135,41 @@ private
   def process_vote(message, userid, channelid)
     split = message.split
     videoid = split[1].to_i
-    if !user_has_voted(userid, videoid, channelid)
-      if split[0] == "!upvote" && videoid > 0
+    if user_is_eligible(userid, videoid, channelid)
+      if split[0] == "!upvote"
         @DB.register_vote(userid, videoid, "upvote")
         send_message(channelid, "<@#{userid}>: I have added your upvote to ##{videoid}.")
-      elsif split[0] == "!downvote" && videoid > 0
+      elsif split[0] == "!downvote"
         @DB.register_vote(userid, videoid, "downvote")
         send_message(channelid, "<@#{userid}>: I have added your downvote to ##{videoid}.")
       else
-        send_message(channelid, "<@#{userid}>: Please specify a correct video ID to vote on.")
       end
     else
-      send_message(channelid, "<@#{userid}>: My apologies, but you have already voted on video ##{videoid}.")
+    end
+  end
+
+  def user_is_eligible(userid, videoid, channelid)
+    latest_id = @DB.last_video_id
+    if (videoid > 0) && (videoid <= latest_id)
+      if user_has_voted(userid, videoid, channelid)
+        send_message(channelid, "<@#{userid}>: My apologies, but you have already voted on video ##{videoid}.")
+        return false
+      else
+        # User has not voted and has supplied a correct video id
+        return true
+      end
+    else
+      send_message(channelid, "<@#{userid}>: That video ID is invalid.")
+      return false
     end
   end
 
   def user_has_voted(userid, videoid, channelid)
-    if videoid <= 0
-      send_message(channelid, "<@#{userid}>: Please specify a correct video ID to vote on.")
+    list = @DB.voted_list(videoid)
+    if list.include?(userid)
+      return true
     else
-      list = @DB.voted_list(videoid)
-      if list.include?(userid)
-        return true
-      else
-        return false
-      end
+      return false
     end
   end
 
