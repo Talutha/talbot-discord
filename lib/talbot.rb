@@ -13,7 +13,7 @@ require_relative './talbot/database'
   event.respond "Pong!"
 end
 
-@bot.message(in: "#video-share", from: not!("TalBotExtreme")) do |event|
+@bot.message(from: not!("TalBotExtreme")) do |event|
   #Thread.new do
   # puts "-----[Video Share Message Received!] \nevent.author: #{event.author.username}\nevent.channel: #{event.channel.name}\nevent.content: #{event.content}\nevent.timestamp: #{event.timestamp}"
     author = "#{event.author.username}"
