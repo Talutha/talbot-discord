@@ -57,7 +57,7 @@ end
 
 def announce_online(checking)
   # Send a message to any channel @bot.send_message(room_id, "message")
-  @bot.send_message(@config.stream_announce, "**#{checking.display_name}** has just started streaming! \n \n *__#{checking.game_name}__* \n #{checking.stream_title} \n \n Watch them right now at http://www.twitch.tv/#{checking.stream_name}")
+  #@bot.send_message(@config.stream_announce, "**#{checking.display_name}** has just started streaming! \n \n *__#{checking.game_name}__* \n #{checking.stream_title} \n \n Watch them right now at http://www.twitch.tv/#{checking.stream_name}")
   checking.already_announced = true
 end
 
@@ -130,6 +130,10 @@ private
       process_vote(message, userid, channelid)
     elsif message == "!random"
       get_random_video(channelid)
+    elsif message == "!top"
+      get_top_video(channelid)
+    elsif message == "!bottom"
+      get_bottom_video(channelid)
     end
   end
 
@@ -186,7 +190,23 @@ private
     selected_url, selected_userid, selected_timestamp = @DB.get_video(video_selected)
     upvotes, downvotes, total = @DB.get_scores(video_selected)
     format_timestamp = selected_timestamp.strftime("%m/%d/%Y")
-    send_message(channelid, "<@#{selected_userid}> posted this video on #{format_timestamp}: #{selected_url} \n \n This video is currently rated **#{total}**(*#{upvotes}:#{downvotes}*). \n Vote on this video by typing **!upvote #{video_selected}** or **!downvote #{video_selected}**! \n \n ---------- ")
+    send_message(channelid, "<@#{selected_userid}> posted this video on #{format_timestamp}: \n #{selected_url} \n \n This video is currently rated **#{total}**(*#{upvotes}:#{downvotes}*). \n Vote on this video by typing **!upvote #{video_selected}** or **!downvote #{video_selected}**! \n \n ---------- ")
+  end
+
+  def get_top_video(channelid)
+    top_id = @DB.get_top_video
+    selected_url, selected_userid, selected_timestamp = @DB.get_video(top_id)
+    upvotes, downvotes, total = @DB.get_scores(top_id)
+    format_timestamp = selected_timestamp.strftime("%m/%d/%Y")
+    send_message(channelid, "The top rated video was posted by <@#{selected_userid}> on #{format_timestamp}: \n #{selected_url} \n \n This video is currently rated **#{total}**(*#{upvotes}:#{downvotes}*). \n Vote on this video by typing **!upvote #{top_id}** or **!downvote #{top_id}**! \n \n ----------")
+  end
+
+  def get_bottom_video(channelid)
+    bottom_id = @DB.get_bottom_video
+    selected_url, selected_userid, selected_timestamp = @DB.get_video(bottom_id)
+    upvotes, downvotes, total = @DB.get_scores(bottom_id)
+    format_timestamp = selected_timestamp.strftime("%m/%d/%Y")
+    send_message(channelid, "The lowest rated video was posted by <@#{selected_userid}> on #{format_timestamp}: \n #{selected_url} \n \n This video is currently rated **#{total}**(*#{upvotes}:#{downvotes}*). \n Vote on this video by typing **!upvote #{bottom_id}** or **!downvote #{bottom_id}**! \n \n ----------")
   end
 
 end

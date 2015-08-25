@@ -52,6 +52,18 @@ class DatabaseCalls
     return url, userid, timestamp
   end
 
+  def get_top_video
+    get_id = @DB[:discord_video_share].reverse_order(:total).limit(1)
+    id = get_id.first[:id]
+    return id
+  end
+
+  def get_bottom_video
+    get_id = @DB[:discord_video_share].order(:total).limit(1)
+    id = get_id.first[:id]
+    return id
+  end
+
 private
 
   def connect_to_database
