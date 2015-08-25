@@ -123,7 +123,7 @@ private
         # Add video to Database
         latest_id = @DB.insert_new_video(author, userid, url[0])
         # Send message explaining everything
-        send_message(channelid, "I have added <@#{userid}>'s video to the database under the ID #{latest_id}")
+        send_message(channelid, "I have added <@#{userid}>'s video to the database under the ID ##{latest_id}")
       end
     # If user is attempting to vote, eg: !voteup 43, or !votedown 99
     elsif message.include?("!upvote") || message.include?("!downvote")
@@ -138,10 +138,10 @@ private
     if user_is_eligible(userid, videoid, channelid)
       if split[0] == "!upvote"
         @DB.register_vote(userid, videoid, "upvote")
-        send_message(channelid, "<@#{userid}>: I have added your upvote to ##{videoid}.")
+        send_message(channelid, "<@#{userid}>: I have added your upvote to video ##{videoid}. The score of this video is now #{score_string(videoid)}.")
       elsif split[0] == "!downvote"
         @DB.register_vote(userid, videoid, "downvote")
-        send_message(channelid, "<@#{userid}>: I have added your downvote to ##{videoid}.")
+        send_message(channelid, "<@#{userid}>: I have added your downvote to ##{videoid}. The score of this video is now #{score_string(videoid)}.")
       else
       end
     else
@@ -171,6 +171,12 @@ private
     else
       return false
     end
+  end
+
+  def score_string(videoid)
+    upvotes, downvotes, total = @DB.get_scores(videoid)
+    score_string = "**#{total}**(*#{upvotes}:#{downvotes}*)"
+    return score_string
   end
 
 end
