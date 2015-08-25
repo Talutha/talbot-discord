@@ -6,6 +6,7 @@ class DatabaseCalls
   def initialize
     @config = BotConfig.new
     connect_to_database
+    load_db_extensions
     create_tables
     grab_tables
   end
@@ -13,6 +14,19 @@ class DatabaseCalls
   def insert_new_video(username, userid, url)
     @video_share.insert(:username => username, :userid => userid, :url => url,
                         :upvotes => 0, :downvotes => 0, :timestamp => Time.now)
+  end
+
+  def register_vote(userid, videoid, vote)
+    if vote == "upvote"
+      upvote(userid, videoid)
+    elsif vote == "downvote"
+      downvote(userid, videoid)
+    end
+    add_to_voted(userid, videoid)
+  end
+
+  def voted_list(userid, videoid)
+    @video_share.where[:id => videoid][:voted]
   end
 
 private
@@ -34,11 +48,30 @@ private
                             userid int NOT NULL,
                             upvotes int NOT NULL,
                             downvotes int NOT NULL,
+                            voted integer[],
                             timestamp timestamp NOT NULL ); ")
   end
 
   def grab_tables
     @video_share = @DB[:discord_video_share]
+  end
+
+  def load_db_extensions
+    @DB.extension :pg_array
+  end
+
+  def upvote(userid, videoid)
+    @video_share.where(:id => videoid).update(:upvotes => Sequel.expr(1) + :upvotes)
+  end
+
+  def downvote(userid, videoid)
+    @video_share.where(:id => videoid).update(:downvotes => Sequel.expr(1) + :downvotes)
+  end
+
+  def add_to_voted(userid, videoid)
+    voted_list = @video_share.where[:id => videoid][:voted]
+    voted_list << userid
+    @video_share.where(:id => videoid).update(:voted => Sequel.pg_array(voted_list))
   end
 
 end
