@@ -98,12 +98,12 @@ private
 
   def upvote(userid, videoid)
     @video_share.where(:id => videoid).update(:upvotes => Sequel.expr(1) + :upvotes)
-    @video_share.where(:id => videoid).update(:total => Sequel.expr(1) + :upvotes)
+    @video_share.where(:id => videoid).update(:total => Sequel.expr(1) + :total)
   end
 
   def downvote(userid, videoid)
     @video_share.where(:id => videoid).update(:downvotes => Sequel.expr(1) + :downvotes)
-    @video_share.where(:id => videoid).update(:total => Sequel.expr(-1) + :upvotes)
+    @video_share.where(:id => videoid).update(:total => Sequel.expr(-1) + :total)
   end
 
   def add_to_voted(userid, videoid)
