@@ -118,9 +118,9 @@ private
       # check to see if the URL is YouTube
       if url_split[2].downcase == "www.youtube.com"
         # Add video to Database
-        @DB.insert_new_video(author, userid, url[0])
+        latest_id = @DB.insert_new_video(author, userid, url[0])
         # Send message explaining everything
-        send_message(channelid, "I have added #{url} to the database!")
+        send_message(channelid, "I have added <@#{userid}>'s video to the database under the ID #{latest_id}")
       end
     end
   end
