@@ -123,7 +123,7 @@ private
         send_message(channelid, "I have added <@#{userid}>'s video to the database under the ID #{latest_id}")
       end
     # If user is attempting to vote, eg: !voteup 43, or !votedown 99
-    elsif message.include?("!vote")
+    elsif message.include?("!upvote") || message.include?("!downvote")
       # Go through vote processing
       process_vote(message, userid, channelid)
     end
@@ -133,10 +133,10 @@ private
     split = message.split
     videoid = split[1].to_i
     if split[0] == "!upvote" && videoid > 0
-      register_vote(userid, videoid, "upvote")
+      @DB.register_vote(userid, videoid, "upvote")
       send_message(channelid, "<@#{userid}>: I have added your upvote to ##{videoid}.")
     elsif split[0] == "!downvote" && videoid > 0
-      register_vote(userid, videoid, "downvote")
+      @DB.register_vote(userid, videoid, "downvote")
       send_message(channelid, "<@#{userid}>: I have added your downvote to ##{videoid}.")
     else
       send_message(channelid, "<@#{userid}>: Please specify a correct video ID to vote on.")
