@@ -29,7 +29,12 @@ end
 end
 
 @bot.ready do |event|
+  puts "Connected"
   check_if_online_timer
+end
+
+@bot.disconnected do |event|
+  puts "Disconnected"
 end
 
 def check_if_online_timer
