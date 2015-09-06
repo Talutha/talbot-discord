@@ -7,6 +7,7 @@ require_relative './talbot/database'
 
 @config = BotConfig.new
 @bot = Discordrb::Bot.new @config.email, @config.password
+@preconnected = false
 
 @bot.message(with_text: "Ping!") do |event|
   puts "#{event.channel.id}"
@@ -30,7 +31,10 @@ end
 
 @bot.ready do |event|
   puts "Connected"
-  check_if_online_timer
+  if !@preconnected
+    check_if_online_timer
+    @preconnected = true
+  end
 end
 
 @bot.disconnected do |event|
